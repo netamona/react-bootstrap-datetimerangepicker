@@ -6,6 +6,19 @@ import getOptions from './getOptions';
 
 let events = ['Show', 'Hide', 'ShowCalendar', 'HideCalendar', 'Apply', 'Cancel'];
 
+const renderIgnoringUnstableFlushDiscreteUpdates = component => {
+  /* eslint-disable no-console */
+  const originalError = console.error
+  const error = jest.fn()
+  console.error = error
+  const result = render( component )
+  expect( error ).toHaveBeenCalledTimes( 1 )
+  expect( error ).toHaveBeenCalledWith( 'Warning: unstable_flushDiscreteUpdates: Cannot flush updates when React is already rendering.%s', expect.any( String ) )
+  console.error = originalError
+  /* eslint-enable no-console */
+  return result
+}
+
 class DatetimeRangePicker extends React.Component {
 
   static propTypes = {
@@ -127,14 +140,16 @@ class DatetimeRangePicker extends React.Component {
     };
   }
 
+
   render() {
     this.setOptionsFromProps();
+    return renderIgnoringUnstableFlushDiscreteUpdates(this.props.children);
 
-    return (
-      <div ref="picker" style={this.props.style} className={this.props.className}>
-        {this.props.children}
-      </div>
-    );
+    // return (
+    //   <div ref="picker" style={this.props.style} className={this.props.className}>
+    //     {this.props.children}
+    //   </div>
+    // );
   }
 
 }
